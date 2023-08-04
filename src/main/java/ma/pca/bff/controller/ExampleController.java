@@ -99,14 +99,14 @@ public class ExampleController {
         ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:8000/testmatching", requestEntity, String.class);
 
         return new ResponseEntity<>(response.getBody(), HttpStatus.OK);}
-    @GetMapping("/jobmatching")
+    @GetMapping("/joboffer")
     @ResponseBody
-    public String getJobMatching() throws IOException {
+    public String getJoboffer() throws IOException {
         RestTemplate restTemplate = new RestTemplate();
-        String apiUrl = "http://localhost:8000/jobmatching"; // Replace with the URL of your FastAPI API
+        String apiUrl = "http://localhost:8000/joboffer"; // Replace with the URL of your FastAPI API
         String response = restTemplate.getForObject(apiUrl, String.class);
-
         System.out.println(response);
         return response;
     }
+
 }
