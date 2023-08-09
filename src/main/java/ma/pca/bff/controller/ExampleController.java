@@ -12,6 +12,7 @@ import ma.pca.starter.web.rest.RequestDetails;
 import ma.pca.starter.web.rest.RestClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
@@ -25,19 +26,21 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.core.io.ByteArrayResource;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 @RestController
 @RequestMapping(Resources.API + Resources.EXAMPLE)
 @Slf4j
+@PreAuthorize("hasRole('CANDIDAT')")
 public class ExampleController {
     @Autowired
     ExampleService exampleService;
-
 
 
     @Autowired
@@ -46,32 +49,30 @@ public class ExampleController {
     @GetMapping
     public ExampleResponse getExample() {
         restClient.execute(
-            RequestDetails.builder().path("http://localhost:8081/api/exception")
-                .build(), HttpMethod.GET, null, ExampleResponse.class, null);
+                RequestDetails.builder().path("http://localhost:8081/api/exception")
+                        .build(), HttpMethod.GET, null, ExampleResponse.class, null);
         throw new FunctionalRuntimeException(
-            ExampleExceptionType.EXAMPLE_EXCEPTION, "Testingé Exception");
+                ExampleExceptionType.EXAMPLE_EXCEPTION, "Testingé Exception");
     }
 
     @GetMapping(path = "/page")
     public ExamplePageableResponse getExamplePage(
-        @RequestParam(required = false)
-        final Integer page) {
+            @RequestParam(required = false) final Integer page) {
         return exampleService.examplePage(page == null ? 1 : page);
     }
 
     @PostMapping(path = "/gateway")
     public ExampleResponse gatewayExample(
-        @RequestBody
-        final ExampleRequest request) {
+            @RequestBody final ExampleRequest request) {
         return exampleService.processRequest(request);
     }
 
     @PostMapping
     public ExampleResponse postExample(
-        @RequestBody
-        final ExampleRequest request) {
+            @RequestBody final ExampleRequest request) {
         return ExampleResponse.builder().value("Testing").build();
     }
+
     @PostMapping("/calculate-similarity")
     public ResponseEntity<String> calculateSimilarity(@RequestParam("cv") MultipartFile cv,
                                                       @RequestParam("job_name") String job_name) throws IOException {
@@ -98,15 +99,19 @@ public class ExampleController {
 
         ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:8000/testmatching", requestEntity, String.class);
 
-        return new ResponseEntity<>(response.getBody(), HttpStatus.OK);}
+        return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
+    }
+
     @GetMapping("/joboffer")
     @ResponseBody
     public String getJoboffer() throws IOException {
         RestTemplate restTemplate = new RestTemplate();
         String apiUrl = "http://localhost:8000/joboffer"; // Replace with the URL of your FastAPI API
-        String response = restTemplate.getForObject(apiUrl, String.class);
-        System.out.println(response);
-        return response;
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+        ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, String.class);
+        System.out.println(response.getBody());
+        return response.getBody();
     }
 
 }
