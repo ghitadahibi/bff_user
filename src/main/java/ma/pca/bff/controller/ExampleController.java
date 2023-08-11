@@ -37,7 +37,7 @@ import org.json.JSONObject;
 @RestController
 @RequestMapping(Resources.API + Resources.EXAMPLE)
 @Slf4j
-@PreAuthorize("hasRole('CANDIDAT')")
+
 public class ExampleController {
     @Autowired
     ExampleService exampleService;
@@ -72,7 +72,7 @@ public class ExampleController {
             @RequestBody final ExampleRequest request) {
         return ExampleResponse.builder().value("Testing").build();
     }
-
+    @PreAuthorize("hasRole('CANDIDAT')")
     @PostMapping("/calculate-similarity")
     public ResponseEntity<String> calculateSimilarity(@RequestParam("cv") MultipartFile cv,
                                                       @RequestParam("job_name") String job_name) throws IOException {
@@ -101,7 +101,6 @@ public class ExampleController {
 
         return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
     }
-
     @GetMapping("/joboffer")
     @ResponseBody
     public String getJoboffer() throws IOException {
